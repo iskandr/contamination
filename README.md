@@ -19,11 +19,13 @@ for Art Blocks.
 
 Annie's summary of rules learned in Jay Stuckey's drawing class: 
 
-| Foregoround             | Background          |
-| ------------------------| ------------------- |
-| Crisp & clear           | Blurry              |
-| Saturated (& more red)  | More gray (or blue) |
-
-*  
-* 
-* 
+| Foregoround              | Background              |
+| ------------------------ | ----------------------- |
+| Crisp & clear            | Blurry                  |
+| Saturated (& more red)   | More gray (or blue)     |
+| Bigger                   | Smaller                 |
+| Objects farther apart    | Objects closer together |
+| In front                 | Behind                  |
+| More marks               | Fewer marks             |
+| Heavier lines            | Lighter lines           |
+| Usually near bottom      | Higher or closer to horizon |
