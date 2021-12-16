@@ -29,3 +29,9 @@ Annie's summary of rules learned in Jay Stuckey's drawing class:
 | More marks               | Fewer marks             |
 | Heavier lines            | Lighter lines           |
 | Usually near bottom      | Higher or closer to horizon |
+
+
+## Ideas
+
+* Create more complex shapes rather than just expanding blobs using rules that imitate multicellular-like behavior from bacterial "quorom sensing", raft formation, or [swaming motility](https://en.wikipedia.org/wiki/Swarming_motility
+* Horizon can be a diffusing chemical from the top of the canvas
