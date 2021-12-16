@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <script type="application/javascript">
+
+const CANVAS_X = CANVAS_Y = 500;
+var start_x, start_y;
+var bacteria_counts;
+const max_stroke_weight = 10;
+const max_viable_density = 2;
+const fps = 24;
+
+const int = Math.floor
+
+const draw_interval = 1000 / fps;
+
+function randInt(min, max) {
+  let range = max - min;
+  return min + Math.floor(Math.random() * range);
+}
+
+function randFloat(min, max) {
+  let range = max - min;
+  return min + (Math.random() * range);
+}
+
+function random(choices) {
+  return choices[Math.min(choices.length - 1, randInt(0, choices.length))];
+}
+
+
+
+function setup() {
+  start_x = Math.floor(CANVAS_X / 2); // int(random(0, CANVAS_X));
+  start_y = Math.floor(CANVAS_Y / 2); // int(random(0, CANVAS_Y));
+  bacteria_counts = new Array(CANVAS_X);
+  for (let i = 0; i < CANVAS_X; ++i) {
+    bacteria_counts[i] = new Array(CANVAS_Y);
+  }
+  for (let i = 0; i < CANVAS_X; ++i) {
+    for (let j = 0; j < CANVAS_Y; ++j) {
+      bacteria_counts[i][j] = 0;
+    }
+  }
+  bacteria_counts[start_x][start_y] = 1;
+  setInterval(draw, draw_interval);
+}
+
+function draw() {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, CANVAS_X, CANVAS_Y); // clear the canvas
+  var draw_count = 0;
+  // Quadratric curves example
+  for (let i = 0; i < CANVAS_X; ++i) {
+    for (let j = 0; j < CANVAS_Y; ++j) {
+      if (bacteria_counts[i][j]){
+
+        // Shadow
+        // ctx.shadowColor = 'rgba(255, 0, 0, .8)';
+        //ctx.shadowBlur = 3;
+        //ctx.shadowOffsetX = 3;
+        //ctx.shadowOffsetY = 2;
+
+// Filled rectangle
+        ctx.lineWidth = Math.max(1, Math.round(max_stroke_weight * j / CANVAS_Y));
+        ctx.strokeStyle = `hsla(200, ${j / CANVAS_Y * 100}%, 70%, 1.0)`;
+
+        ctx.beginPath();
+        ctx.moveTo(i, j);
+        ctx.quadraticCurveTo(i + randInt(-3, 2), j + randInt(-3, 2), i + randInt(-2, 2), j + randInt(-2, 2));
+
+        // ctx.ellipse(i, j, 2, 2, 0, 0, Math.PI * 2);
+
+        draw_count += 1;
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.fillText(`Draw calls: ${draw_count}`, 10, 100);
+  for (let i = 1; i < CANVAS_X - 1; ++i) {
+    for (let j = 1; j < CANVAS_Y - 1; ++j) {
+      if (bacteria_counts[i][j]) {
+        bacteria_counts[i][j] += 1;
+        let x_offset = random([1, -1]);
+        let y_offset = random([1, -1]);
+        bacteria_counts[i + x_offset][j + y_offset] += 1;
+      }
+    }
+  }
+  for (let i = 1; i < CANVAS_X - 1; ++i) {
+    for (let j = 1; j < CANVAS_Y - 1; ++j) {
+      if (bacteria_counts[i][j] > max_viable_density) {
+        bacteria_counts[i][j] = 0;
+      }
+    }
+  }
+
+ 
+}
+setup();
+
+</script>
+  </head>
+  <body>
+    <main>
+      <canvas id="canvas" width="800" height="800"></canvas>
+    </main>
+  </body>
+</html>
