@@ -4,7 +4,9 @@
 
 const CANVAS_X = CANVAS_Y = 500;
 var start_x, start_y;
-var bacteria_counts;
+var prey_counts;
+var predator_counts;
+const num_predators_start = 10;
 const max_stroke_weight = 10;
 const max_viable_density = 2;
 const fps = 24;
@@ -30,21 +32,56 @@ function random(choices) {
 
 
 function setup() {
-  start_x = Math.floor(CANVAS_X / 2); // int(random(0, CANVAS_X));
-  start_y = Math.floor(CANVAS_Y / 2); // int(random(0, CANVAS_Y));
-  bacteria_counts = new Array(CANVAS_X);
+  prey_start_x = Math.floor(CANVAS_X / 2); // int(random(0, CANVAS_X));
+  prey_start_y = Math.floor(CANVAS_Y / 2); // int(random(0, CANVAS_Y));
+  prey_counts = new Array(CANVAS_X);
+  predator_counts = new Array(CANVAS_X);
   for (let i = 0; i < CANVAS_X; ++i) {
-    bacteria_counts[i] = new Array(CANVAS_Y);
+    prey_counts[i] = new Array(CANVAS_Y);
+    predator_counts[i] = new Array(CANVAS_Y);
   }
   for (let i = 0; i < CANVAS_X; ++i) {
     for (let j = 0; j < CANVAS_Y; ++j) {
-      bacteria_counts[i][j] = 0;
+      prey_counts[i][j] = 0;
+      predator_counts[i][j] = 0;
     }
   }
-  bacteria_counts[start_x][start_y] = 1;
+  prey_counts[prey_start_x][prey_start_y] = 1;
+  for (let i = 0; i < num_predators_start; ++i) {
+    predator_counts[randInt(0, CANVAS_X), randInt(0, CANVAS_Y)] = 1;
+  }
   setInterval(draw, draw_interval);
 }
 
+function step() {
+  for (let i = 1; i < CANVAS_X - 1; ++i) {
+    for (let j = 1; j < CANVAS_Y - 1; ++j) {
+      if (prey_counts[i][j] > max_viable_density) {
+        prey_counts[i][j] = 0;
+      }
+      if (predator_counts[i][j]) {
+        let num_prey = prey_counts[i][j]
+        prey_counts[i][j] = Math.max(0, num_prey - predator_counts[i][j])
+        for (let k = 0; k < num_prey; ++k) {
+          predator_counts[i + random([-1, 1]), j + random([-1, 1])] += 1;
+        }
+      }
+      if (prey_counts[i][j]) {
+        prey_counts[i][j] += 1;
+        let x_offset = random([1, -1]);
+        let y_offset = random([1, -1]);
+        prey_counts[i + x_offset][j + y_offset] += 1;
+      }
+
+    }
+  }
+  for (let i = 1; i < CANVAS_X - 1; ++i) {
+    for (let j = 1; j < CANVAS_Y - 1; ++j) {
+
+    }
+  }
+
+}
 function draw() {
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
@@ -76,23 +113,7 @@ function draw() {
     }
   }
   ctx.fillText(`Draw calls: ${draw_count}`, 10, 100);
-  for (let i = 1; i < CANVAS_X - 1; ++i) {
-    for (let j = 1; j < CANVAS_Y - 1; ++j) {
-      if (bacteria_counts[i][j]) {
-        bacteria_counts[i][j] += 1;
-        let x_offset = random([1, -1]);
-        let y_offset = random([1, -1]);
-        bacteria_counts[i + x_offset][j + y_offset] += 1;
-      }
-    }
-  }
-  for (let i = 1; i < CANVAS_X - 1; ++i) {
-    for (let j = 1; j < CANVAS_Y - 1; ++j) {
-      if (bacteria_counts[i][j] > max_viable_density) {
-        bacteria_counts[i][j] = 0;
-      }
-    }
-  }
+
 
  
 }
