@@ -8,14 +8,32 @@ var bacteria_counts;
 const max_stroke_weight = 10;
 const max_viable_density = 2;
 const fps = 24;
+const prey_hue = 200;
 
 const int = Math.floor
 
 const draw_interval = 1000 / fps;
+const rand = Math.random
 
 function randInt(min, max) {
   let range = max - min;
   return min + Math.floor(Math.random() * range);
+}
+
+function randBool(p) {
+  return rand() > p
+}
+
+function randRound(x) {
+  let min = Math.floor(x)
+  let max = Math.ceil(x)
+  let p = x - min
+  if (randBool(p)) {
+    return max;
+  } else {
+    return min;
+  }
+
 }
 
 function randFloat(min, max) {
@@ -56,13 +74,13 @@ function draw() {
       if (bacteria_counts[i][j]){
 
         // Shadow
-        ctx.shadowColor = 'rgba(255, 0, 0, .8)';
-        ctx.shadowBlur = 3;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowColor = `hsla(${prey_hue}, 20%, 40%, .5)`;
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 1;
 
-        ctx.lineWidth = Math.max(1, Math.round(max_stroke_weight * j / CANVAS_Y));
-        ctx.strokeStyle = `hsla(200, ${j / CANVAS_Y * 100}%, 70%, 1.0)`;
+        ctx.lineWidth = Math.max(1, randRound(max_stroke_weight * j / CANVAS_Y));
+        ctx.strokeStyle = `hsla(${prey_hue}, ${j / CANVAS_Y * 100}%, 70%, 1.0)`;
 
         ctx.beginPath();
         ctx.moveTo(i, j);

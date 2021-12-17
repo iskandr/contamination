@@ -3,27 +3,51 @@
     <script type="application/javascript">
 
 const CANVAS_X = CANVAS_Y = 500;
-var start_x, start_y;
-var prey_counts;
-var predator_counts;
-const num_predators_start = 10;
+const prey_counts = new Array(CANVAS_X);
+const predator_counts = new Array(CANVAS_X);
+
+const num_predators_start = 50;
+const init_predators_life = 500;
+const predators_life_to_reproduce = 120;
+const life_per_prey = 50;
+
 const max_stroke_weight = 10;
 const max_viable_density = 2;
 const fps = 24;
 
-const int = Math.floor
-
 const draw_interval = 1000 / fps;
+const prey_hue = 200;
+const predator_hue = 10;
+
+const int = Math.floor
+const rand = Math.random
 
 function randInt(min, max) {
   let range = max - min;
   return min + Math.floor(Math.random() * range);
 }
 
+
+function randBool(p) {
+  return rand() > p
+}
+
 function randFloat(min, max) {
   let range = max - min;
   return min + (Math.random() * range);
 }
+function randRound(x) {
+  let min = Math.floor(x)
+  let max = Math.ceil(x)
+  let p = x - min
+  if (randBool(p)) {
+    return max;
+  } else {
+    return min;
+  }
+
+}
+
 
 function random(choices) {
   return choices[Math.min(choices.length - 1, randInt(0, choices.length))];
@@ -32,10 +56,8 @@ function random(choices) {
 
 
 function setup() {
-  prey_start_x = Math.floor(CANVAS_X / 2); // int(random(0, CANVAS_X));
-  prey_start_y = Math.floor(CANVAS_Y / 2); // int(random(0, CANVAS_Y));
-  prey_counts = new Array(CANVAS_X);
-  predator_counts = new Array(CANVAS_X);
+  let prey_start_x = Math.floor(CANVAS_X / 2);
+  let prey_start_y = Math.floor(CANVAS_Y / 2);
   for (let i = 0; i < CANVAS_X; ++i) {
     prey_counts[i] = new Array(CANVAS_Y);
     predator_counts[i] = new Array(CANVAS_Y);
@@ -47,24 +69,45 @@ function setup() {
     }
   }
   prey_counts[prey_start_x][prey_start_y] = 1;
+
   for (let i = 0; i < num_predators_start; ++i) {
-    predator_counts[randInt(0, CANVAS_X), randInt(0, CANVAS_Y)] = 1;
+    let rand_predator_x = randInt(0, CANVAS_X)
+    let rand_predator_y = randInt(0, CANVAS_Y)
+    predator_counts[rand_predator_x][rand_predator_y] = init_predators_life;
   }
   setInterval(draw, draw_interval);
 }
 
 function step() {
-  for (let i = 1; i < CANVAS_X - 1; ++i) {
-    for (let j = 1; j < CANVAS_Y - 1; ++j) {
+  for (let i = 0; i < CANVAS_X; ++i) {
+    for (let j = 0; j < CANVAS_Y; ++j) {
+
+      if (predator_counts[i][j]) {
+        if (prey_counts[i][j]) {
+          predator_counts[i][j] += prey_counts[i][j] * life_per_prey;
+          prey_counts[i][j] -= 0;
+        } else {
+          let new_predator_x = i + random([-2, -1, 0, 1, 2])
+          let new_predator_y = j + random([-2, -1, 0, 1, 2])
+          if (
+                  (new_predator_x >= 0 && new_predator_x < CANVAS_X) &&
+                  (new_predator_y >= 0 && new_predator_y < CANVAS_Y) &&
+                  (new_predator_x != i || new_predator_y != j) &&
+                  (predator_counts[new_predator_x][new_predator_y] == 0)) {
+            if (predator_counts[i][j] > predators_life_to_reproduce) {
+              let half = int(predator_counts[i][j] / 2)
+              predator_counts[new_predator_x][new_predator_y] = half;
+              predator_counts[i][j] = half;
+            } else {
+              predator_counts[new_predator_x][new_predator_y] = predator_counts[i][j] - 1;
+              predator_counts[i][j] = 0;
+            }
+          }
+        }
+
+      }
       if (prey_counts[i][j] > max_viable_density) {
         prey_counts[i][j] = 0;
-      }
-      if (predator_counts[i][j]) {
-        let num_prey = prey_counts[i][j]
-        prey_counts[i][j] = Math.max(0, num_prey - predator_counts[i][j])
-        for (let k = 0; k < num_prey; ++k) {
-          predator_counts[i + random([-1, 1]), j + random([-1, 1])] += 1;
-        }
       }
       if (prey_counts[i][j]) {
         prey_counts[i][j] += 1;
@@ -72,34 +115,28 @@ function step() {
         let y_offset = random([1, -1]);
         prey_counts[i + x_offset][j + y_offset] += 1;
       }
-
     }
   }
-  for (let i = 1; i < CANVAS_X - 1; ++i) {
-    for (let j = 1; j < CANVAS_Y - 1; ++j) {
-
-    }
-  }
-
 }
 function draw() {
+  step();
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, CANVAS_X, CANVAS_Y); // clear the canvas
   var draw_count = 0;
+  var predator_count = 0;
   // Quadratric curves example
   for (let i = 0; i < CANVAS_X; ++i) {
     for (let j = 0; j < CANVAS_Y; ++j) {
-      if (bacteria_counts[i][j]){
-
+      if (prey_counts[i][j]){
         // Shadow
-        ctx.shadowColor = 'rgba(255, 0, 0, .8)';
+        ctx.shadowColor = `hsla(${prey_hue}, 20%, 40%, .4)`;
         ctx.shadowBlur = 3;
         ctx.shadowOffsetX = 3;
         ctx.shadowOffsetY = 2;
 
-        ctx.lineWidth = Math.max(1, Math.round(max_stroke_weight * j / CANVAS_Y));
-        ctx.strokeStyle = `hsla(200, ${j / CANVAS_Y * 100}%, 70%, 1.0)`;
+        ctx.lineWidth = Math.max(1, randRound(max_stroke_weight * j / CANVAS_Y));
+        ctx.strokeStyle = `hsla(${prey_hue}, ${j / CANVAS_Y * 100}%, 70%, 0.8)`;
 
         ctx.beginPath();
         ctx.moveTo(i, j);
@@ -110,10 +147,31 @@ function draw() {
         draw_count += 1;
         ctx.stroke();
       }
+
+      if (predator_counts[i][j]) {
+
+        predator_count += 1;
+
+        // Shadow
+        ctx.shadowColor = `hsla(${predator_hue}, 20%, 40%, .05)`;
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 2;
+
+        ctx.lineWidth = Math.max(1, randRound(max_stroke_weight * j / CANVAS_Y));
+        ctx.strokeStyle = `hsla(${predator_hue}, ${j / CANVAS_Y * 100}%, 70%, 0.1)`;
+
+        ctx.beginPath();
+        ctx.moveTo(i, j);
+        ctx.quadraticCurveTo(i + randInt(-3, 2), j + randInt(-3, 2), i + randInt(-2, 2), j + randInt(-2, 2));
+        draw_count += 1;
+        ctx.stroke();
+      }
     }
   }
   ctx.fillText(`Draw calls: ${draw_count}`, 10, 100);
 
+  ctx.fillText(`Num predators: ${predator_count}`, 10, 200);
 
  
 }
